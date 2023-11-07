@@ -211,23 +211,24 @@ def ipm(c, A, eps, alpha, point):
 # Initial point calculation
 # X's used in c we equate to 0, slacks we use to make equations in A equal to values in b
 def calculate_initial_point(c, A, b):
-	ip = [0 for x in range(len(c))]
-	num_of_ones = 0
-	for i in range(len(c)):
-		if c[i][0] != 0:
-			ip[i] = 1.0
-			num_of_ones += 1
-	for i in range(len(b)):
-		need = b[i]
-		for j in range(len(c)):
-			need -= A[i][j]*ip[j]
-		ip[i+num_of_ones] = need
-		# If any of x's is less than 0 in initial point then it is not applicable
-		if need < 0:
-			output_file.write("The method is not applicable!")
-			input_file.close()
-			output_file.close()
-			exit(1)
+	# ip = [0 for x in range(len(c))]
+	# num_of_ones = 0
+	# for i in range(len(c)):
+	# 	if c[i][0] != 0:
+	# 		ip[i] = 1.0
+	# 		num_of_ones += 1
+	# for i in range(len(b)):
+	# 	need = b[i]
+	# 	for j in range(len(c)):
+	# 		need -= A[i][j]*ip[j]
+	# 	ip[i+num_of_ones] = need
+	# 	# If any of x's is less than 0 in initial point then it is not applicable
+	# 	if need < 0:
+	# 		output_file.write("The method is not applicable!")
+	# 		input_file.close()
+	# 		output_file.close()
+	# 		exit(1)
+	ip = [float(x) for x in input("Input initial point: ").split()]
 	return [ip]
 
 
@@ -243,7 +244,7 @@ A = input_list[1:-2]
 b = input_list[-2]
 eps = input_list[-1][0]
 
-# Caluclating initial point
+# Calculating initial point
 initial_point = calculate_initial_point(c, A, b)
 
 # Calculating and outputting answer, when alpha is equal to 0.5
