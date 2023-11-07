@@ -2,6 +2,7 @@ input_file = open("input.txt", "r")
 output_file = open("output.txt", "w")
 
 
+# Error handler
 def error(msg, error_type=1):
 	print(msg)
 	if error_type == 2:
@@ -212,7 +213,6 @@ def ipm(c, A, eps, alpha, point):
 
 
 # Initial point calculation
-# X's used in c we equate to 0, slacks we use to make equations in A equal to values in b
 def calculate_initial_point(c, A, b):
 	ip = []
 	choice = int(input("If you want to input initial point on your own, type '1', "
@@ -220,8 +220,10 @@ def calculate_initial_point(c, A, b):
 	if choice == 1:
 		ip = [float(x) for x in input("Input initial point: ").split()]
 		while not check_initial(ip, c, A, b):
+			print("Initial point does not fit the conditions, try another one.")
 			ip = [float(x) for x in input("Input initial point: ").split()]
 	elif choice == 2:
+		# X's used in c are equated to 1, slacks are generated to make subjected (in)equalities true
 		ip = [0 for x in range(len(c))]
 		num_of_ones = 0
 		for i in range(len(c)):
@@ -233,35 +235,45 @@ def calculate_initial_point(c, A, b):
 			for j in range(len(c)):
 				need -= A[i][j] * ip[j]
 			ip[i + num_of_ones] = need
-			# If any of x's is less than 0 in initial point then the method is not applicable
-			if need < 0:
-				error("The method is not applicable!", 2)
+			if not check_initial(ip, c, A, b):
+				print("Can not generate suitable initial point, try to input it on your own.")
+				first_try = 0
+				while not check_initial(ip, c, A, b):
+					if first_try != 0:
+						print("Initial point does not fit the conditions, try another one.")
+					ip = [float(x) for x in input("Input initial point: ").split()]
+					first_try = 1
 	return [ip]
 
 
+# Check if initial point fits the given conditions
 def check_initial(initial, c, A, b):
 	num_of_ones = 0
 	less_or_more = []
-	is_ok = True
+	ok = True
+	# Check if there is any negative x's in initial point
 	for i in range(len(c)):
 		if c[i][0] != 0:
 			num_of_ones += 1
-	for i in range(len(b)):
-		less_or_more.append(True)
-		coefficients = A[i]
-		sum_in_point = 0
-		for j in range(num_of_ones):
-			sum_in_point += coefficients[j] * initial[j]
-		for j in range(num_of_ones, len(coefficients)):
-			if coefficients[j] == -1:
-				less_or_more[-1] = False
-			sum_in_point += coefficients[j] * initial[j]
-		if sum_in_point > b[i] and less_or_more[i]:
-			is_ok = False
-		elif sum_in_point < b[i] and not less_or_more[i]:
-			is_ok = False
-	if not is_ok:
-		print("Initial point does not fit the conditions, try another one.")
+			if initial[i] < 0:
+				ok = False
+	# Check if all the subjected (in)equalities are true
+	if ok:
+		for i in range(len(b)):
+			less_or_more.append(True)
+			coefficients = A[i]
+			sum_in_point = 0
+			for j in range(num_of_ones):
+				sum_in_point += coefficients[j] * initial[j]
+			for j in range(num_of_ones, len(coefficients)):
+				if coefficients[j] == -1:
+					less_or_more[-1] = False
+				sum_in_point += coefficients[j] * initial[j]
+			if sum_in_point > b[i] and less_or_more[i]:
+				ok = False
+			elif sum_in_point < b[i] and not less_or_more[i]:
+				ok = False
+	if not ok:
 		return False
 	else:
 		return True
